@@ -1,8 +1,7 @@
 
-var width = parseInt(d3.select("#scatter").style("width"));
 
 // hight and padding 
-var width = 900;
+var width = 800;
 var height = 500;
 var margin = 20;
 var labelArea = 80;
@@ -20,7 +19,7 @@ var svg = d3
 // radius for each point 
 var radius;
 function crGet() {
-  if (width <= 500) {
+  if (width <= 530) {
     radius = 5;
   }
   else {
@@ -28,9 +27,6 @@ function crGet() {
   }
 }
 crGet();
-
-
-
 
 
 
@@ -85,7 +81,7 @@ yTextRefresh();
 
 
 //Obesity data 
-xText
+yText
   .append("text")
   .attr("y", 0)
   .attr("data-name", "obesity")
@@ -101,45 +97,110 @@ var curY = "obesity";
 // import csv
 d3.csv("assets/data/data.csv").then(function(data) {
   visualize(data);
-
+ console.log(data)
 function visualize(theData) {
    var curX = "income";
    var curY = "obesity";
   
+
+
+  var yScale = d3
+      .scaleLinear()
+
+  
+ 
+    var xMin;
+    var xMax;
+    var yMin;
+    var yMax; 
+  }
+function xRange(){
+  xMin = d3.min(data,function(d){
+    return parseFloat (d[curX])*.90;
+
+  });
+  xMax = d3.max(data,function(d){
+    return parseFloat (d[curX])*1.1;
+  })
+}
+function yRange(){
+  yMin = d3.min(data,function(d){
+    return parseFloat (d[curY])*.90;
+
+  });
+  yMax = d3.max(data,function(d){
+    return parseFloat (d[curY])*1.1;
+  })
 }
 
+xRange();
+yRange();
+
+var xScale = d3
+    .scaleLinear()
+    .domain([xMin, xMax])
+    .range([margin + labelArea, width - margin]);
 var yScale = d3
     .scaleLinear()
+    .domain([yMin, yMax])
+    .range([height - margin - labelArea, margin]);
 
-var circRadius;
-function crGet() {
-  if (width <= 530) {
-  circRadius = 10;
+var xAxis= d3.axisBottom(xScale);
+var yAxis= d3.axisLeft(yScale);
+
+
+function tickMarks() {
+  if (width <= 500) {
+    xAxis.ticks(5);
+    yAxis.ticks(5);
   }
   else {
-  circRadius = 10;
-      }
-    }
-    crGet();
-    
+    xAxis.ticks(10);
+    yAxis.ticks(10);
+  }
+}
+tickMarks();
 
-//circles and state abreevs 
-var theCircles = svg.selectAll("g theCircles").data(data).enter();
 
-theCircles
+
+svg
+  .append("g")
+  .call(xAxis)
+  .attr ("class", "xAxis")
+  .attr("transform", "translate(0," + (height-margin-labelArea)+")");
+svg
+  .append("g")
+  .call(yAxis)
+  .attr ("class", "yAxis")
+  .attr("transform", "translate(" + (margin+labelArea)+",0)");
+
+
+
+
+//circles 
+var theCirc = svg.selectAll("g theCircles").data(data).enter();
+
+theCirc
     .append("circle")
     .attr("cx", function(d) {
       return xScale(d[curX]);
     })
     .attr("cy", function(d) {
-      return yScale(d[curY]);
+      return yScale (d[curY]);
     })
-    .attr("r", circRadius)
+    .attr("r", radius)
     .attr("class", function(d) {
       return "stateCircle " + d.abbr;
     })
 
-theCircles
+
+
+
+
+    
+
+//state abreevs 
+theCirc
     .append("text")
     .text(function(d) {
       return d.abbr;
@@ -148,14 +209,9 @@ theCircles
       return xScale(d[curX]);
     })
     .attr("dy", function(d) {
-      return yScale(d[curY]) + circRadius / 2.5;
+      return yScale(d[curY]) + radius / 2.5;
     })
-    .attr("font-size", circRadius)
+    .attr("font-size", radius)
     .attr("class", "stateText")
 
   });
-
-
-  var xScale = d3
-  .scaleLinear()
-  .range([margin + labelArea, width - margin]);
